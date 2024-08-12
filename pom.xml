@@ -335,6 +335,10 @@
 			<id>spring-libs-release</id>
 			<url>https://repo.spring.io/libs-release</url>
 		</repository>
+		<repository>
+			<id>restlet</id>
+			<url>https://maven.restlet.talend.com/</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>

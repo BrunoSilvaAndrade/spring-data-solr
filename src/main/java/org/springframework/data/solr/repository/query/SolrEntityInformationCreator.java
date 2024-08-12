@@ -15,10 +15,12 @@
  */
 package org.springframework.data.solr.repository.query;
 
+import org.springframework.context.ApplicationContextAware;
+
 /**
  * @author Christoph Strobl
  */
-public interface SolrEntityInformationCreator {
+public interface SolrEntityInformationCreator extends ApplicationContextAware {
 
 	<T, ID> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass);
 

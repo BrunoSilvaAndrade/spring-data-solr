@@ -15,6 +15,8 @@
  */
 package org.springframework.data.solr.repository.support;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
 import org.springframework.data.solr.core.mapping.SolrPersistentProperty;
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
 public class SolrEntityInformationCreatorImpl implements SolrEntityInformationCreator {
 
 	private final MappingContext<? extends SolrPersistentEntity<?>, SolrPersistentProperty> mappingContext;
+	private ApplicationContext applicationContext;
 
 	public SolrEntityInformationCreatorImpl(
 			MappingContext<? extends SolrPersistentEntity<?>, SolrPersistentProperty> mappingContext) {
@@ -41,8 +44,12 @@ public class SolrEntityInformationCreatorImpl implements SolrEntityInformationCr
 	public <T, ID> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 
 		SolrPersistentEntity<T> persistentEntity = (SolrPersistentEntity<T>) mappingContext.getRequiredPersistentEntity(domainClass);
-
+		persistentEntity.setApplicationContext(applicationContext);
 		return new MappingSolrEntityInformation<>(persistentEntity);
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 }

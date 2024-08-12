@@ -24,6 +24,9 @@ import java.util.Optional;
 import java.util.WeakHashMap;
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.core.NamedQueries;
@@ -54,13 +57,14 @@ import org.springframework.util.Assert;
  *
  * @author Christoph Strobl
  */
-public class SolrRepositoryFactory extends RepositoryFactorySupport {
+public class SolrRepositoryFactory extends RepositoryFactorySupport implements ApplicationContextAware{
 
 	private SolrOperations solrOperations;
 	private final SolrEntityInformationCreator entityInformationCreator;
 	private @Nullable SolrClientFactory factory;
 	private SolrTemplateHolder templateHolder = new SolrTemplateHolder();
 	private boolean schemaCreationSupport;
+	private ApplicationContext applicationContext;
 
 	public SolrRepositoryFactory(SolrOperations solrOperations) {
 		Assert.notNull(solrOperations, "SolrOperations must not be null!");
@@ -110,6 +114,7 @@ public class SolrRepositoryFactory extends RepositoryFactorySupport {
 
 	@Override
 	public <T, ID> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+		entityInformationCreator.setApplicationContext(applicationContext);
 		return entityInformationCreator.getEntityInformation(domainClass);
 	}
 
@@ -176,6 +181,11 @@ public class SolrRepositoryFactory extends RepositoryFactorySupport {
 	 */
 	public void setSchemaCreationSupport(boolean schemaCreationSupport) {
 		this.schemaCreationSupport = schemaCreationSupport;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 	private class SolrQueryLookupStrategy implements QueryLookupStrategy {
