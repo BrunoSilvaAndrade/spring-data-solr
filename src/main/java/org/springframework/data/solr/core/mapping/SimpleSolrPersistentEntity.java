@@ -18,7 +18,6 @@ package org.springframework.data.solr.core.mapping;
 import java.util.Locale;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PropertyHandler;
@@ -26,6 +25,8 @@ import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import static java.util.Objects.isNull;
 
 /**
  * Solr specific {@link PersistentEntity} implementation holding eg. name of solr core.
@@ -39,7 +40,7 @@ import org.springframework.util.StringUtils;
 public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, SolrPersistentProperty> implements SolrPersistentEntity<T> {
 	private final TypeInformation<T> typeInformation;
 	private String collectionName;
-	private Environment environment;
+	private ApplicationContext applicationContext;
 
 	public SimpleSolrPersistentEntity(TypeInformation<T> typeInformation) {
 		super(typeInformation);
@@ -54,7 +55,7 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		environment = applicationContext.getEnvironment();
+		this.applicationContext = applicationContext;
 	}
 
 	private String derivateSolrCollectionName() {
@@ -72,7 +73,10 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 	 */
 	@Override
 	public String getCollectionName() {
-		return environment.resolveRequiredPlaceholders(collectionName);
+		if(isNull(applicationContext))
+			return collectionName;
+
+		return applicationContext.getEnvironment().resolveRequiredPlaceholders(collectionName);
 	}
 
 	/*

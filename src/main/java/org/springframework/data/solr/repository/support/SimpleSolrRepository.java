@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -37,6 +38,7 @@ import org.springframework.data.solr.core.query.SimpleQuery;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.data.solr.repository.query.SolrEntityInformation;
+import org.springframework.data.solr.repository.query.SolrEntityInformationCreator;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -78,12 +80,15 @@ public class SimpleSolrRepository<T, ID extends Serializable> implements SolrCru
 	 * @param solrOperations must not be null
 	 * @param entityClass
 	 */
-	public SimpleSolrRepository(SolrOperations solrOperations, Class<T> entityClass) {
-		this(solrOperations, getEntityInformation(entityClass));
+	public SimpleSolrRepository(SolrOperations solrOperations, Class<T> entityClass, ApplicationContext applicationContext) {
+		this(solrOperations, getEntityInformation(entityClass, applicationContext));
 	}
 
-	private static SolrEntityInformation getEntityInformation(Class type) {
-		return new SolrEntityInformationCreatorImpl(new SimpleSolrMappingContext()).getEntityInformation(type);
+	private static SolrEntityInformation getEntityInformation(Class type, ApplicationContext applicationContext) {
+		final SolrEntityInformationCreator creator = new SolrEntityInformationCreatorImpl(new SimpleSolrMappingContext());
+		creator.setApplicationContext(applicationContext);
+
+		return creator.getEntityInformation(type);
 	}
 
 	@Override

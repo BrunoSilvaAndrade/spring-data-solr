@@ -15,6 +15,7 @@
  */
 package org.springframework.data.solr.core.mapping;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.mapping.context.AbstractMappingContext;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
@@ -29,6 +30,7 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleSolrMappingContext
 		extends AbstractMappingContext<SimpleSolrPersistentEntity<?>, SolrPersistentProperty> {
+	private ApplicationContext applicationContext;
 
 	public SimpleSolrMappingContext() {
 		this(null);
@@ -42,7 +44,9 @@ public class SimpleSolrMappingContext
 
 	@Override
 	protected <T> SimpleSolrPersistentEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
-		return new SimpleSolrPersistentEntity<>(typeInformation);
+		final SimpleSolrPersistentEntity persistentEntity = new SimpleSolrPersistentEntity<>(typeInformation);
+		persistentEntity.setApplicationContext(applicationContext);
+		return persistentEntity;
 	}
 
 	@Override
@@ -51,4 +55,9 @@ public class SimpleSolrMappingContext
 		return new SimpleSolrPersistentProperty(property, owner, simpleTypeHolder);
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext){
+		super.setApplicationContext(applicationContext);
+		this.applicationContext = applicationContext;
+	}
 }
