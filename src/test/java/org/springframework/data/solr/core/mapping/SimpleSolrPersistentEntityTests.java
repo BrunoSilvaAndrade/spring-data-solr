@@ -25,8 +25,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.solr.core.mapping.SimpleSolrPersistentPropertyTest.BeanWithScore;
-import org.springframework.data.spel.ExtensionAwareEvaluationContextProvider;
-import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
 
 /**
@@ -175,56 +173,6 @@ public class SimpleSolrPersistentEntityTests {
 				.withMessageContaining("wildcard");
 	}
 
-	@Test // DATASOLR-463
-	public void evaluatesSpELExpressionInCollectionName() {
-
-		when(typeInfo.getType()).thenReturn(DocumentWithSimpleSpEL.class);
-
-		SimpleSolrPersistentEntity<DocumentWithSimpleSpEL> pe = new SimpleSolrPersistentEntity<>(typeInfo);
-		assertThat(pe.getCollectionName()).isEqualTo("35");
-	}
-
-	@Test // DATASOLR-463
-	public void evaluatesSpELExpressionWithBeanReferenceInCollectionName() {
-
-		CollectionNameProvider provider = new CollectionNameProvider();
-		provider.collectionName = "reference";
-
-		when(context.getBean("cnp")).thenReturn(provider);
-		when(typeInfo.getType()).thenReturn(DocumentWithBeanReferencingSpEL.class);
-
-		SimpleSolrPersistentEntity<DocumentWithBeanReferencingSpEL> entity = new SimpleSolrPersistentEntity<DocumentWithBeanReferencingSpEL>(
-				typeInfo);
-		entity.setEvaluationContextProvider(new ExtensionAwareEvaluationContextProvider(context));
-
-		assertThat(entity.getCollectionName()).isEqualTo("reference");
-
-		provider.collectionName = "otherReference";
-
-		assertThat(entity.getCollectionName()).isEqualTo("otherReference");
-	}
-
-	@Test // DATASOLR-463
-	public void exposesTargetTypeAsVariable() {
-
-		CollectionNameProvider provider = new CollectionNameProvider();
-		provider.collectionName = "reference";
-
-		when(context.getBean("cnp")).thenReturn(provider);
-
-		SimpleSolrPersistentEntity<Document1WithBeanReferencingSpElUsingTargetTypeInfo> entity = new SimpleSolrPersistentEntity<>(
-				ClassTypeInformation.from(Document1WithBeanReferencingSpElUsingTargetTypeInfo.class));
-		entity.setEvaluationContextProvider(new ExtensionAwareEvaluationContextProvider(context));
-
-		assertThat(entity.getCollectionName()).isEqualTo("reference");
-
-		SimpleSolrPersistentEntity<Document2WithBeanReferencingSpElUsingTargetTypeInfo> entity2 = new SimpleSolrPersistentEntity<>(
-				ClassTypeInformation.from(Document2WithBeanReferencingSpElUsingTargetTypeInfo.class));
-		entity2.setEvaluationContextProvider(new ExtensionAwareEvaluationContextProvider(context));
-
-		assertThat(entity2.getCollectionName()).isEqualTo("doc2");
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test // DATASOLR-471
 	public void deprecatedScoreAnnotationShouldBeConsidered() {
@@ -257,35 +205,4 @@ public class SimpleSolrPersistentEntityTests {
 	static class InheritingClass extends ParentClassWithSolrDocumentAnnotation {}
 
 	static class DocumentWithScore {}
-
-	@SolrDocument(collection = "#{35}")
-	static class DocumentWithSimpleSpEL {}
-
-	@SolrDocument(collection = "#{@cnp.getCollectionName()}")
-	static class DocumentWithBeanReferencingSpEL {}
-
-	@SolrDocument(collection = "#{@cnp.getCollectionName(#targetType)}")
-	static class Document1WithBeanReferencingSpElUsingTargetTypeInfo {}
-
-	@SolrDocument(collection = "#{@cnp.getCollectionName(#targetType)}")
-	static class Document2WithBeanReferencingSpElUsingTargetTypeInfo {}
-
-	static class CollectionNameProvider {
-
-		String collectionName;
-
-		public String getCollectionName() {
-			return collectionName;
-		}
-
-		public String getCollectionName(Class<?> targetType) {
-
-			if (Document2WithBeanReferencingSpElUsingTargetTypeInfo.class.equals(targetType)) {
-				return "doc2";
-			}
-
-			return collectionName;
-		}
-	}
-
 }

@@ -80,13 +80,12 @@ public class SimpleSolrRepository<T, ID extends Serializable> implements SolrCru
 	 * @param solrOperations must not be null
 	 * @param entityClass
 	 */
-	public SimpleSolrRepository(SolrOperations solrOperations, Class<T> entityClass, ApplicationContext applicationContext) {
-		this(solrOperations, getEntityInformation(entityClass, applicationContext));
+	public SimpleSolrRepository(SolrOperations solrOperations, Class<T> entityClass) {
+		this(solrOperations, getEntityInformation(entityClass));
 	}
 
-	private static SolrEntityInformation getEntityInformation(Class type, ApplicationContext applicationContext) {
+	private static SolrEntityInformation getEntityInformation(Class type) {
 		final SolrEntityInformationCreator creator = new SolrEntityInformationCreatorImpl(new SimpleSolrMappingContext());
-		creator.setApplicationContext(applicationContext);
 
 		return creator.getEntityInformation(type);
 	}
