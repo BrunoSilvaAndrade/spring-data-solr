@@ -16,25 +16,17 @@
 package org.springframework.data.solr.core.mapping;
 
 import java.util.Locale;
-
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.expression.BeanFactoryAccessor;
-import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PropertyHandler;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.util.TypeInformation;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.common.LiteralExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import static java.util.Objects.isNull;
 
 /**
  * Solr specific {@link PersistentEntity} implementation holding eg. name of solr core.
@@ -44,22 +36,17 @@ import org.springframework.util.StringUtils;
  * @author Francisco Spaeth
  * @author Mark Paluch
  */
-public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, SolrPersistentProperty>
-		implements SolrPersistentEntity<T>, ApplicationContextAware {
 
+public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, SolrPersistentProperty> implements SolrPersistentEntity<T> {
 	private final TypeInformation<T> typeInformation;
-	private final StandardEvaluationContext context;
 	private String collectionName;
-
-	private final @Nullable Expression expression;
+	private ApplicationContext applicationContext;
 
 	public SimpleSolrPersistentEntity(TypeInformation<T> typeInformation) {
-
 		super(typeInformation);
-		this.context = new StandardEvaluationContext();
+
 		this.typeInformation = typeInformation;
 		this.collectionName = derivateSolrCollectionName();
-		this.expression = potentiallyExtractCollectionExpresssion(collectionName);
 	}
 
 	/*
@@ -68,10 +55,7 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-
-		context.addPropertyAccessor(new BeanFactoryAccessor());
-		context.setBeanResolver(new BeanFactoryResolver(applicationContext));
-		context.setRootObject(applicationContext);
+		this.applicationContext = applicationContext;
 	}
 
 	private String derivateSolrCollectionName() {
@@ -83,29 +67,16 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 		return this.typeInformation.getType().getSimpleName().toLowerCase(Locale.ENGLISH);
 	}
 
-	private static Expression potentiallyExtractCollectionExpresssion(String collectionName) {
-
-		Expression expression = new SpelExpressionParser().parseExpression(collectionName,
-				ParserContext.TEMPLATE_EXPRESSION);
-
-		return expression instanceof LiteralExpression ? null : expression;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.mapping.SolrPersistentEntity#getCollectionName()
 	 */
 	@Override
 	public String getCollectionName() {
-
-		if (expression == null) {
+		if(isNull(applicationContext))
 			return collectionName;
-		}
 
-		EvaluationContext ctx = getEvaluationContext(null);
-		ctx.setVariable("targetType", typeInformation.getType());
-
-		return expression.getValue(ctx, String.class);
+		return applicationContext.getEnvironment().resolveRequiredPlaceholders(collectionName);
 	}
 
 	/*

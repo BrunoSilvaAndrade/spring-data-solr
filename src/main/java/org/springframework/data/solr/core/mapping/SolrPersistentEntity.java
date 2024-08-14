@@ -15,6 +15,7 @@
  */
 package org.springframework.data.solr.core.mapping;
 
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.lang.Nullable;
 
@@ -24,7 +25,7 @@ import org.springframework.lang.Nullable;
  * @author Francisco Spaeth
  * @author Mark Paluch
  */
-public interface SolrPersistentEntity<T> extends PersistentEntity<T, SolrPersistentProperty> {
+public interface SolrPersistentEntity<T> extends PersistentEntity<T, SolrPersistentProperty>, ApplicationContextAware {
 
 	/**
 	 * Get the core's name for this entity.

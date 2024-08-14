@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -37,6 +38,7 @@ import org.springframework.data.solr.core.query.SimpleQuery;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.data.solr.repository.query.SolrEntityInformation;
+import org.springframework.data.solr.repository.query.SolrEntityInformationCreator;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -83,7 +85,9 @@ public class SimpleSolrRepository<T, ID extends Serializable> implements SolrCru
 	}
 
 	private static SolrEntityInformation getEntityInformation(Class type) {
-		return new SolrEntityInformationCreatorImpl(new SimpleSolrMappingContext()).getEntityInformation(type);
+		final SolrEntityInformationCreator creator = new SolrEntityInformationCreatorImpl(new SimpleSolrMappingContext());
+
+		return creator.getEntityInformation(type);
 	}
 
 	@Override

@@ -31,6 +31,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -371,6 +373,11 @@ public class SolrQueryTests {
 		@Override
 		public <T, ID> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 			return (SolrEntityInformation<T, ID>) new SolrEntityInformationImpl(persitentEntityMock);
+		}
+
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+
 		}
 	}
 

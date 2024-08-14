@@ -718,8 +718,12 @@ public class SolrTemplate implements SolrOperations, InitializingBean, Applicati
 	public void afterPropertiesSet() {
 
 		if (this.mappingContext == null) {
-			this.mappingContext = new SimpleSolrMappingContext(
+			final SimpleSolrMappingContext simpleSolrMappingContext = new SimpleSolrMappingContext(
 					new SolrPersistentEntitySchemaCreator(this.solrClientFactory).enable(this.schemaCreationFeatures));
+
+			simpleSolrMappingContext.setApplicationContext(applicationContext);
+
+			this.mappingContext = simpleSolrMappingContext;
 		}
 
 		if (this.solrConverter == null) {

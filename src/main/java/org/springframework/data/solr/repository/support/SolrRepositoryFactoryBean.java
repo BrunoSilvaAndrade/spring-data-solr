@@ -18,7 +18,10 @@ package org.springframework.data.solr.repository.support;
 import java.io.Serializable;
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
@@ -35,13 +38,14 @@ import org.springframework.util.Assert;
  * @author Christoph Strobl
  */
 public class SolrRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extends Serializable>
-		extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
+		extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> implements ApplicationContextAware {
 
 	private @Nullable SolrClient solrClient;
 	private @Nullable SolrOperations operations;
 	private boolean schemaCreationSupport;
 	private @Nullable SimpleSolrMappingContext solrMappingContext;
 	private @Nullable SolrConverter solrConverter;
+	private @Nullable ApplicationContext applicationContext;
 
 	/**
 	 * Creates a new {@link SolrRepositoryFactoryBean} for the given repository interface.
@@ -120,6 +124,12 @@ public class SolrRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extend
 		SolrRepositoryFactory factory = operations != null ? new SolrRepositoryFactory(this.operations)
 				: new SolrRepositoryFactory(this.solrClient, solrConverter);
 		factory.setSchemaCreationSupport(schemaCreationSupport);
+		factory.setApplicationContext(applicationContext);
 		return factory;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 }
