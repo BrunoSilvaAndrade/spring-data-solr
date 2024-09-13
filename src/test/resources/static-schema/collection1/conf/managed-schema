@@ -177,7 +177,7 @@
 
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
-   <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 
    <!-- catchall text field that indexes tokens both normally and in reverse for efficient
         leading wildcard queries. -->
@@ -260,25 +260,25 @@
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
 
-   <copyField source="cat" dest="text"/>
-   <copyField source="name" dest="text"/>
-   <copyField source="manu" dest="text"/>
-   <copyField source="features" dest="text"/>
-   <copyField source="includes" dest="text"/>
+   <copyField source="cat" dest="_text_"/>
+   <copyField source="name" dest="_text_"/>
+   <copyField source="manu" dest="_text_"/>
+   <copyField source="features" dest="_text_"/>
+   <copyField source="includes" dest="_text_"/>
    <copyField source="manu" dest="manu_exact"/>
 
    <!-- Copy the price into a currency enabled field (default USD) -->
    <copyField source="price" dest="price_c"/>
 
    <!-- Text fields from SolrCell to search by default in our catch-all field -->
-   <copyField source="title" dest="text"/>
-   <copyField source="author" dest="text"/>
-   <copyField source="description" dest="text"/>
-   <copyField source="keywords" dest="text"/>
-   <copyField source="content" dest="text"/>
-   <copyField source="content_type" dest="text"/>
-   <copyField source="resourcename" dest="text"/>
-   <copyField source="url" dest="text"/>
+   <copyField source="title" dest="_text_"/>
+   <copyField source="author" dest="_text_"/>
+   <copyField source="description" dest="_text_"/>
+   <copyField source="keywords" dest="_text_"/>
+   <copyField source="content" dest="_text_"/>
+   <copyField source="content_type" dest="_text_"/>
+   <copyField source="resourcename" dest="_text_"/>
+   <copyField source="url" dest="_text_"/>
 
    <!-- Copy numeric fields to *PointFields implementation -->
    <copyField source="*_i" dest="*_pi"/>
@@ -300,7 +300,7 @@
     destination field is to use the dynamic field syntax.
     copyField also supports a maxChars to copy setting.  -->
 
-   <!-- <copyField source="*_t" dest="text" maxChars="3000"/> -->
+   <!-- <copyField source="*_t" dest="_text_" maxChars="3000"/> -->
 
    <!-- copy name to alphaNameSort, a field designed for sorting by name -->
    <!-- <copyField source="name" dest="alphaNameSort"/> -->
@@ -322,6 +322,7 @@
 
     <!-- boolean type: "true" or "false" -->
     <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+    <fieldType name="booleans" class="solr.BoolField" sortMissingLast="true" multiValued="true"/>
 
     <!-- sortMissingLast and sortMissingFirst attributes are optional attributes are
          currently supported on types that are sorted internally as strings

@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @author Christoph Strobl
  * @since 2.0
  */
+@Deprecated
 public class HttpSolrClientFactory extends SolrClientFactoryBase {
 
 	private @Nullable Credentials credentials;
@@ -84,4 +85,7 @@ public class HttpSolrClientFactory extends SolrClientFactoryBase {
 		return httpClient.getClass().getName().contains("InternalHttpClient");
 	}
 
+	protected final boolean isHttpSolrClient(SolrClient solrClient) {
+		return (solrClient instanceof HttpSolrClient);
+	}
 }

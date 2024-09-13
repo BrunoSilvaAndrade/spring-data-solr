@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -31,6 +32,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +45,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.geo.Box;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
+import org.springframework.data.solr.AbstractITestWithEmbeddedSolrServer;
+import org.springframework.data.solr.core.SolrOperations;
+import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.SimpleField;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.data.solr.core.query.result.FacetAndHighlightPage;
@@ -52,6 +60,7 @@ import org.springframework.data.solr.core.query.result.HighlightPage;
 import org.springframework.data.solr.core.query.result.SpellcheckedPage;
 import org.springframework.data.solr.core.query.result.StatsPage;
 import org.springframework.data.solr.repository.ProductBean.ContentType;
+import org.springframework.data.solr.repository.config.EnableSolrRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
@@ -65,12 +74,29 @@ import org.springframework.util.StringUtils;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class ITestSolrRepositoryOperations {
+public class ITestSolrRepositoryOperations extends AbstractITestWithEmbeddedSolrServer {
 
 	private static final ProductBean POPULAR_AVAILABLE_PRODUCT = createProductBean("1", 5, true);
 	private static final ProductBean UNPOPULAR_AVAILABLE_PRODUCT = createProductBean("2", 1, true);
 	private static final ProductBean UNAVAILABLE_PRODUCT = createProductBean("3", 3, false);
 	private static final ProductBean NAMED_PRODUCT = createProductBean("4", 3, true, "product");
+
+	@Configuration
+	@EnableSolrRepositories(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ProductRepository.class))
+	static class Config {
+
+		@Bean
+		public SolrOperations solrTemplate() {
+			return new SolrTemplate(solrClient());
+		}
+
+		@Bean
+		public SolrClient solrClient() {
+			return server.getSolrClient("collection1");
+		}
+
+	}
+
 
 	@Autowired private ProductRepository repo;
 

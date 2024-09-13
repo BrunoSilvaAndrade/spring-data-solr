@@ -19,6 +19,9 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Optional;
 
+import javax.annotation.Priority;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.se.SeContainer;
 import javax.enterprise.inject.se.SeContainerInitializer;
 
@@ -26,17 +29,33 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.data.solr.AbstractITestWithEmbeddedSolrServer;
+import org.springframework.data.solr.core.SolrOperations;
+import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.repository.ProductBean;
 
 /**
  * @author Christoph Strobl
  * @author Mark Paluch
  */
-public class ITestCdiRepository {
+public class ITestCdiRepository extends AbstractITestWithEmbeddedSolrServer{
 
 	private static SeContainer cdiContainer;
 	private CdiProductRepository repository;
 	private SamplePersonRepository samplePersonRepository;
+
+	@Priority(1)
+	@ApplicationScoped
+	static class Config{
+
+		@Produces
+		public SolrOperations solrOperations() {
+			final SolrTemplate template = new SolrTemplate(server.getSolrClient());
+			template.afterPropertiesSet();
+
+			return template;
+		}
+	}
 
 	@BeforeClass
 	public static void init() {

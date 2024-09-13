@@ -32,7 +32,9 @@ import org.springframework.util.Assert;
  *
  * @author Christoph Strobl
  * @since 2.0
+ * @deprecated HttpSolrClient has been deprecated since solrj 9+
  */
+@Deprecated
 public class HttpSolrClientFactoryBean extends HttpSolrClientFactory
 		implements FactoryBean<SolrClient>, InitializingBean, DisposableBean {
 

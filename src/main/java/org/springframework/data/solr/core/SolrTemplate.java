@@ -75,7 +75,7 @@ import org.springframework.data.solr.core.schema.SchemaOperations;
 import org.springframework.data.solr.core.schema.SolrPersistentEntitySchemaCreator;
 import org.springframework.data.solr.core.schema.SolrPersistentEntitySchemaCreator.Feature;
 import org.springframework.data.solr.server.SolrClientFactory;
-import org.springframework.data.solr.server.support.HttpSolrClientFactory;
+import org.springframework.data.solr.server.support.NoOpSolrClientFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -118,11 +118,11 @@ public class SolrTemplate implements SolrOperations, InitializingBean, Applicati
 	};
 
 	public SolrTemplate(SolrClient solrClient) {
-		this(new HttpSolrClientFactory(solrClient));
+		this(new NoOpSolrClientFactory(solrClient));
 	}
 
 	public SolrTemplate(SolrClient solrClient, RequestMethod requestMethod) {
-		this(new HttpSolrClientFactory(solrClient), requestMethod);
+		this(new NoOpSolrClientFactory(solrClient), requestMethod);
 	}
 
 	public SolrTemplate(SolrClientFactory solrClientFactory) {

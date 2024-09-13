@@ -34,10 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.solr.client.solrj.beans.Field;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.common.params.FacetParams.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -59,9 +58,9 @@ import org.springframework.data.solr.core.query.FacetOptions.FieldWithFacetParam
 import org.springframework.data.solr.core.query.FacetOptions.FieldWithNumericRangeParameters;
 import org.springframework.data.solr.core.query.Query.Operator;
 import org.springframework.data.solr.core.query.result.*;
-import org.springframework.data.solr.server.support.HttpSolrClientFactory;
 
 import com.google.common.collect.Lists;
+import org.springframework.data.solr.server.support.HttpSolrClientFactory;
 
 /**
  * @author Christoph Strobl
@@ -779,12 +778,12 @@ public class ITestSolrTemplate extends AbstractITestWithEmbeddedSolrServer {
 
 		SimpleQuery query = new SimpleQuery(new Criteria("id").in("rh-1", "rh-2"));
 		Page<ExampleSolrBean> page = solrTemplate.queryForPage(COLLECTION_NAME, query, ExampleSolrBean.class);
-		assertThat(page.getContent().size()).isEqualTo(2);
+		assertThat(page.getContent()).hasSize(2);
 
 		query = new SimpleQuery(new Criteria("id").in("rh-1", "rh-2"));
 		query.setRequestHandler("/instock");
 		page = solrTemplate.queryForPage(COLLECTION_NAME, query, ExampleSolrBean.class);
-		assertThat(page.getContent().size()).isEqualTo(1);
+		assertThat(page.getContent()).hasSize(1);
 		assertThat(page.getContent().get(0).getId()).isEqualTo("rh-2");
 	}
 
@@ -799,7 +798,7 @@ public class ITestSolrTemplate extends AbstractITestWithEmbeddedSolrServer {
 		solrTemplate.saveBeans(COLLECTION_NAME, Arrays.asList(belkin, apple, ipod));
 		solrTemplate.commit(COLLECTION_NAME);
 
-		SimpleQuery query = new SimpleQuery(new SimpleStringCriteria("text:ipod"));
+		SimpleQuery query = new SimpleQuery(new SimpleStringCriteria("ipod"));
 		query.setJoin(Join.from("manu_id_s").to("id"));
 
 		Page<ExampleSolrBean> page = solrTemplate.queryForPage(COLLECTION_NAME, query, ExampleSolrBean.class);
@@ -818,7 +817,7 @@ public class ITestSolrTemplate extends AbstractITestWithEmbeddedSolrServer {
 		solrTemplate.saveBeans(COLLECTION_NAME, Arrays.asList(belkin, apple, ipod));
 		solrTemplate.commit(COLLECTION_NAME);
 
-		SimpleQuery query = new SimpleQuery(new SimpleStringCriteria("text:ipod"));
+		SimpleQuery query = new SimpleQuery(new SimpleStringCriteria("ipod"));
 		query.setJoin(Join.from("manu_id_s").fromIndex("collection1").to("id"));
 
 		Page<ExampleSolrBean> page = solrTemplate.queryForPage(COLLECTION_NAME, query, ExampleSolrBean.class);
@@ -1270,7 +1269,6 @@ public class ITestSolrTemplate extends AbstractITestWithEmbeddedSolrServer {
 
 	@Test // DATASOLR-137
 	public void testFindByNameWithSpellcheckSeggestion() {
-
 		ExampleSolrBean bean1 = new ExampleSolrBean("id-1", "green", null);
 		solrTemplate.saveBean(COLLECTION_NAME, bean1);
 		solrTemplate.commit(COLLECTION_NAME);
@@ -1280,21 +1278,20 @@ public class ITestSolrTemplate extends AbstractITestWithEmbeddedSolrServer {
 		q.setRequestHandler("/spell");
 
 		SpellcheckedPage<ExampleSolrBean> found = solrTemplate.query(COLLECTION_NAME, q, ExampleSolrBean.class);
-		assertThat(found.hasContent()).isEqualTo(false);
-		assertThat(found.getSuggestions().size()).isGreaterThan(0);
+		assertThat(found.hasContent()).isFalse();
+		assertThat(found.getSuggestions()).isNotEmpty();
 		assertThat(found.getSuggestions()).containsExactly("green");
 	}
 
 	@Test // DATSOLR-364
 	public void shouldUseBaseUrlInCollectionCallbackWhenExecutingCommands() {
-
-		final HttpSolrClient client = new HttpSolrClient.Builder().withBaseSolrUrl("http://127.0.0.1/solr/").build();
+		final Http2SolrClient client = new Http2SolrClient.Builder("http://127.0.0.1/solr/").build();
 
 		SolrTemplate solrTemplate = new SolrTemplate(new HttpSolrClientFactory(client));
 
 		solrTemplate.execute(solrClient -> {
 
-			assertThat(((HttpSolrClient) solrClient).getBaseURL()).isEqualTo("http://127.0.0.1/solr");
+			assertThat(((Http2SolrClient) solrClient).getBaseURL()).isEqualTo("http://127.0.0.1/solr");
 			return null;
 		});
 	}

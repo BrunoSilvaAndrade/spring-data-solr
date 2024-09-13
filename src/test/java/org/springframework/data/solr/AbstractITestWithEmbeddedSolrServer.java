@@ -33,7 +33,7 @@ public abstract class AbstractITestWithEmbeddedSolrServer {
 	protected static final String DEFAULT_BEAN_ID = "1";
 
 	public static @ClassRule org.springframework.data.solr.test.util.EmbeddedSolrServer server = org.springframework.data.solr.test.util.EmbeddedSolrServer
-			.configure(new ClassPathResource("static-schema"), ClientCache.ENABLED);
+			.configure(new ClassPathResource("static-schema"), ClientCache.DISABLED);
 
 	public void cleanDataInSolr() throws SolrServerException, IOException {
 
